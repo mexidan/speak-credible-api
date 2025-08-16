@@ -1,0 +1,37 @@
+openapi: 3.1.1
+info:
+  title: Speak Credible API
+  version: "1.0.0"
+jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
+servers:
+  - url: https://YOUR-PROJECT.vercel.app
+paths:
+  /api/ping:
+    get:
+      operationId: ping
+      summary: Health check
+      responses:
+        "200":
+          description: OK
+  /api/analyze:
+    post:
+      operationId: analyzeVoice
+      summary: Analyze an audio sample and return voice metrics
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: OK
+components:
+  schemas:
+    Analysis:
+      type: object
