@@ -1,35 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
-
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/**
- * POST /api/analyze
- * Expects: multipart/form-data with a "file" field
- * Auth: header "x-api-key" must equal process.env.API_KEY
- * Returns: stub JSON so you can verify end-to-end
- */
 export async function POST(req: NextRequest) {
+  // Auth (fail closed but FAST)
   const key = req.headers.get("x-api-key");
   if (!process.env.API_KEY || key !== process.env.API_KEY) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // Read multipart form and CONSUME the file (this prevents hangs)
   let form: FormData;
   try {
     form = await req.formData();
   } catch {
     return NextResponse.json({ error: "Bad form-data" }, { status: 400 });
   }
-
   const file = form.get("file") as unknown as File | null;
   if (!file) {
     return NextResponse.json({ error: "Missing 'file'" }, { status: 400 });
   }
+  await file.arrayBuffer(); // <- critical to avoid open stream
 
-  // Consume the stream to avoid hanging, even before real analysis is implemented
-  await file.arrayBuffer();
-
+  // Immediate, deterministic JSON
   return NextResponse.json({
     transcript: "(stub)",
     wpm: 155,
